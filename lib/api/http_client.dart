@@ -4,7 +4,7 @@ import 'package:http/http.dart' as http;
 import 'package:flutter/foundation.dart';
 
 // URL BASE DE TU API. ¡DEBES REEMPLAZAR ESTA URL POR LA REAL DE TU BACKEND!
-const String _kBaseUrl = 'http://api.agronova.com/v1';
+const String _kBaseUrl = 'http://10.0.2.2:3000/v1';
 
 class HttpClient {
   static const Map<String, String> kHeaders = {
