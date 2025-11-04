@@ -1,77 +1,98 @@
-// lib/providers/tipo_insumo_provider.dart
+// lib/providers/insumo_provider.dart
 import 'package:flutter/material.dart';
-import 'package:agronova_app/models/tipo_insumo.dart';
-import 'package:agronova_app/api/tipo_insumo_api.dart';
-import 'package:agronova_app/core/app_constants.dart';
+import '../models/insumo.dart'; // Ruta relativa
+import '../api/insumo_api.dart'; // Ruta relativa
+import '../core/app_constants.dart'; // Ruta relativa
+import '../providers/tipo_insumo_provider.dart'; // Ruta relativa (necesaria para la inyección de la dependencia de catálogo)
 
-class TipoInsumoProvider extends ChangeNotifier {
-  final TipoInsumoApi _api = TipoInsumoApi();
-  List<TipoInsumo> _items = [];
+class InsumoProvider extends ChangeNotifier {
+  final InsumoApi _api = InsumoApi();
+
+  // Lista local para gestión de estado
+  List<Insumo> _insumos = [];
   bool _isLoading = false;
 
-  List<TipoInsumo> get items => _items.where((i) => i.estado == AppStatus.activo).toList();
+  // Solo devuelve insumos activos
+  List<Insumo> get insumos =>
+      _insumos.where((i) => i.estado == AppStatus.activo).toList();
   bool get isLoading => _isLoading;
 
-  Future<void> fetchAll() async {
+  Future<void> fetchInsumos() async {
     _isLoading = true;
     notifyListeners();
     try {
-      _items = await _api.fetchAll();
+      _insumos = await _api.fetchAll();
     } catch (e) {
-      debugPrint('Error fetching tipos insumo: $e');
+      debugPrint('Error fetching insumos: $e');
     } finally {
       _isLoading = false;
       notifyListeners();
     }
   }
 
-  // CORRECCIÓN: Crea una nueva instancia con el estado forzado.
-  Future<void> add(TipoInsumo item) async {
+  // Implementa Inmutabilidad: Crea nueva instancia con estado 'Activo' antes de enviar.
+  Future<void> addInsumo(Insumo insumo) async {
     try {
-      final itemToSend = TipoInsumo(
-        id: item.id,
-        nombre: item.nombre,
-        estado: AppStatus.activo,
+      final itemToSend = Insumo(
+        id: insumo.id,
+        idTipoInsumo: insumo.idTipoInsumo,
+        descripcion: insumo.descripcion,
+        cantidad: insumo.cantidad,
+        unidadMedida: insumo.unidadMedida,
+        estado: AppStatus.activo, // Forzado a activo
       );
-      final newItem = await _api.add(itemToSend);
-      _items.add(newItem);
+      final newInsumo = await _api.add(itemToSend);
+      _insumos.add(newInsumo);
       notifyListeners();
     } catch (e) {
-      debugPrint('Error adding tipo insumo: $e');
+      debugPrint('Error adding insumo: $e');
     }
   }
 
-  Future<void> update(TipoInsumo item) async {
+  Future<void> updateInsumo(Insumo insumo) async {
     try {
-      await _api.update(item);
-      final index = _items.indexWhere((i) => i.id == item.id);
+      await _api.update(insumo);
+      final index = _insumos.indexWhere((i) => i.id == insumo.id);
       if (index != -1) {
-        _items[index] = item;
+        _insumos[index] = insumo;
         notifyListeners();
       }
     } catch (e) {
-      debugPrint('Error updating tipo insumo: $e');
+      debugPrint('Error updating insumo: $e');
     }
   }
 
-  // Eliminación Lógica: Crea nueva instancia y la reemplaza.
-  Future<void> deleteLogico(String id) async {
+  // Eliminación Lógica: Llama a la API, crea nueva instancia y la reemplaza en la lista.
+  Future<void> deleteInsumo(String id) async {
     try {
       await _api.updateEstado(id, AppStatus.inactivo);
-      
-      final index = _items.indexWhere((i) => i.id == id);
+
+      final index = _insumos.indexWhere((i) => i.id == id);
       if (index != -1) {
-        final oldItem = _items[index];
-        final updatedItem = TipoInsumo( 
+        final oldItem = _insumos[index];
+        final updatedItem = Insumo(
           id: oldItem.id,
-          nombre: oldItem.nombre,
-          estado: AppStatus.inactivo, 
+          idTipoInsumo: oldItem.idTipoInsumo,
+          descripcion: oldItem.descripcion,
+          cantidad: oldItem.cantidad,
+          unidadMedida: oldItem.unidadMedida,
+          estado: AppStatus.inactivo, // Nuevo estado
         );
-        _items[index] = updatedItem;
+        _insumos[index] = updatedItem;
       }
       notifyListeners();
     } catch (e) {
-      debugPrint('Error deleting tipo insumo logically: $e');
+      debugPrint('Error deleting insumo logically: $e');
     }
+  }
+
+  List<Insumo> searchInsumo(String descripcion, String tipoId) {
+    return insumos.where((i) {
+      final matchDesc =
+          descripcion.isEmpty ||
+          i.descripcion.toLowerCase().contains(descripcion.toLowerCase());
+      final matchTipo = tipoId.isEmpty || i.idTipoInsumo == tipoId;
+      return matchDesc && matchTipo;
+    }).toList();
   }
 }

@@ -2,7 +2,6 @@
 
 import 'package:flutter/material.dart';
 
-// ignore: slash_for_doc_comments
 /** 
 import 'package:agronova_app/pagina_acerca.dart';
 import 'package:agronova_app/pagina_inicio.dart';
@@ -40,7 +39,7 @@ class CustomDrawer extends StatelessWidget {
               ),
             ),
           ),
-          /** 
+          /** *
           ListTile(
             leading: const Icon(Icons.home),
             title: const Text('Inicio'),
