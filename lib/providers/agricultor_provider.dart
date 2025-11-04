@@ -9,8 +9,7 @@ class AgricultorProvider extends ChangeNotifier {
   List<Agricultor> _agricultores = [];
   bool _isLoading = false;
 
-  List<Agricultor> get agricultores =>
-      _agricultores.where((a) => a.estado == AppStatus.activo).toList();
+  List<Agricultor> get agricultores => _agricultores.where((a) => a.estado == AppStatus.activo).toList();
   bool get isLoading => _isLoading;
 
   Future<void> fetchAgricultores() async {
@@ -62,17 +61,17 @@ class AgricultorProvider extends ChangeNotifier {
   Future<void> deleteAgricultor(String id) async {
     try {
       await _api.updateEstado(id, AppStatus.inactivo);
-
+      
       final index = _agricultores.indexWhere((a) => a.id == id);
       if (index != -1) {
         final oldItem = _agricultores[index];
-        final updatedItem = Agricultor(
+        final updatedItem = Agricultor( 
           id: oldItem.id,
           nombre: oldItem.nombre,
           edad: oldItem.edad,
           zona: oldItem.zona,
           experiencia: oldItem.experiencia,
-          estado: AppStatus.inactivo,
+          estado: AppStatus.inactivo, 
         );
         _agricultores[index] = updatedItem;
       }

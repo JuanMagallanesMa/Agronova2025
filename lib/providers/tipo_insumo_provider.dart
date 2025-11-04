@@ -1,18 +1,24 @@
-// lib/providers/tipo_insumo_provider.dart
 import 'package:flutter/material.dart';
-import 'package:agronova_app/models/tipo_insumo.dart';
-import 'package:agronova_app/api/tipo_insumo_api.dart';
-import 'package:agronova_app/core/app_constants.dart';
+import '../models/tipo_insumo.dart';
+import '../api/tipo_insumo_api.dart';
+import '../core/app_constants.dart';
+import '../core/provider_interfaces.dart'; // <--- Importación de la interfaz
 
-class TipoInsumoProvider extends ChangeNotifier {
+class TipoInsumoProvider extends ChangeNotifier
+    implements IReferenciaProvider<TipoInsumo> {
+  // <--- Implementación de la Interfaz
+
   final TipoInsumoApi _api = TipoInsumoApi();
   List<TipoInsumo> _items = [];
   bool _isLoading = false;
 
+  @override
   List<TipoInsumo> get items =>
       _items.where((i) => i.estado == AppStatus.activo).toList();
+  @override
   bool get isLoading => _isLoading;
 
+  @override
   Future<void> fetchAll() async {
     _isLoading = true;
     notifyListeners();
@@ -26,7 +32,7 @@ class TipoInsumoProvider extends ChangeNotifier {
     }
   }
 
-  // CORRECCIÓN: Crea una nueva instancia con el estado forzado.
+  @override
   Future<void> add(TipoInsumo item) async {
     try {
       final itemToSend = TipoInsumo(
@@ -42,6 +48,7 @@ class TipoInsumoProvider extends ChangeNotifier {
     }
   }
 
+  @override
   Future<void> update(TipoInsumo item) async {
     try {
       await _api.update(item);
@@ -55,7 +62,7 @@ class TipoInsumoProvider extends ChangeNotifier {
     }
   }
 
-  // Eliminación Lógica: Crea nueva instancia y la reemplaza.
+  @override
   Future<void> deleteLogico(String id) async {
     try {
       await _api.updateEstado(id, AppStatus.inactivo);

@@ -1,18 +1,24 @@
-// lib/providers/ubicacion_provider.dart
 import 'package:flutter/material.dart';
-import 'package:agronova_app/models/ubicacion.dart';
-import 'package:agronova_app/api/ubicacion_api.dart';
-import 'package:agronova_app/core/app_constants.dart';
+import '../models/ubicacion.dart';
+import '../api/ubicacion_api.dart';
+import '../core/app_constants.dart';
+import '../core/provider_interfaces.dart'; // <--- Importación de la interfaz
 
-class UbicacionProvider extends ChangeNotifier {
+class UbicacionProvider extends ChangeNotifier
+    implements IReferenciaProvider<Ubicacion> {
+  // <--- Implementación de la Interfaz
+
   final UbicacionApi _api = UbicacionApi();
   List<Ubicacion> _items = [];
   bool _isLoading = false;
 
+  @override
   List<Ubicacion> get items =>
       _items.where((i) => i.estado == AppStatus.activo).toList();
+  @override
   bool get isLoading => _isLoading;
 
+  @override
   Future<void> fetchAll() async {
     _isLoading = true;
     notifyListeners();
@@ -26,7 +32,7 @@ class UbicacionProvider extends ChangeNotifier {
     }
   }
 
-  // CORRECCIÓN: Crea una nueva instancia con el estado forzado.
+  @override
   Future<void> add(Ubicacion item) async {
     try {
       final itemToSend = Ubicacion(
@@ -42,6 +48,7 @@ class UbicacionProvider extends ChangeNotifier {
     }
   }
 
+  @override
   Future<void> update(Ubicacion item) async {
     try {
       await _api.update(item);
@@ -55,7 +62,7 @@ class UbicacionProvider extends ChangeNotifier {
     }
   }
 
-  // Eliminación Lógica: Crea nueva instancia y la reemplaza.
+  @override
   Future<void> deleteLogico(String id) async {
     try {
       await _api.updateEstado(id, AppStatus.inactivo);
