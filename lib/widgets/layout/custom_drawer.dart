@@ -1,9 +1,7 @@
 // lib/widgets/layout/custom_drawer.dart (Actualizado)
 
 import 'package:flutter/material.dart';
-
-/** 
-import 'package:agronova_app/pagina_acerca.dart';
+//import 'package:agronova_app/pagina_acerca.dart';
 import 'package:agronova_app/pagina_inicio.dart';
 import 'package:agronova_app/screens/agricultores/pagina_agricultores.dart';
 import 'package:agronova_app/screens/cultivos/pagina_cultivos.dart';
@@ -19,7 +17,7 @@ import 'package:agronova_app/providers/categoria_cultivo_provider.dart';
 import 'package:agronova_app/providers/ubicacion_provider.dart';
 import 'package:agronova_app/providers/tipo_insumo_provider.dart';
 import 'package:agronova_app/providers/tipo_tarea_provider.dart';
-*/
+
 class CustomDrawer extends StatelessWidget {
   const CustomDrawer({super.key});
 
@@ -39,7 +37,7 @@ class CustomDrawer extends StatelessWidget {
               ),
             ),
           ),
-          /** *
+          /** */
           ListTile(
             leading: const Icon(Icons.home),
             title: const Text('Inicio'),
@@ -166,16 +164,6 @@ class CustomDrawer extends StatelessWidget {
               Navigator.pushNamed(context, PaginaAgricultores.routeName);
             },
           ),
-          const Divider(),
-          ListTile(
-            leading: const Icon(Icons.info),
-            title: const Text('Acerca de'),
-            onTap: () {
-              Navigator.pop(context);
-              Navigator.pushNamed(context, PaginaAcerca.routeName);
-            },
-          ),
-          */
         ],
       ),
     );

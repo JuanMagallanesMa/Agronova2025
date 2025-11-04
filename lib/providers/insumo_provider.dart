@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import '../models/insumo.dart'; // Ruta relativa
 import '../api/insumo_api.dart'; // Ruta relativa
 import '../core/app_constants.dart'; // Ruta relativa
-import '../providers/tipo_insumo_provider.dart'; // Ruta relativa (necesaria para la inyección de la dependencia de catálogo)
 
 class InsumoProvider extends ChangeNotifier {
   final InsumoApi _api = InsumoApi();

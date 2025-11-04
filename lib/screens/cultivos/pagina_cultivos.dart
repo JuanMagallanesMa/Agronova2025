@@ -23,10 +23,11 @@ class _PaginaCultivosState extends State<PaginaCultivos> {
   void initState() {
     super.initState();
     // Carga inicial del CultivoProvider (asume que los Providers de catálogo ya se están cargando en main.dart)
-    Future.microtask(
-      () =>
-          Provider.of<CultivoProvider>(context, listen: false).fetchCultivos(),
-    );
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        Provider.of<CultivoProvider>(context, listen: false).fetchCultivos();
+      }
+    });
     // Se recomienda cargar los catálogos aquí si no estás seguro de que main.dart lo haga:
     // Future.microtask(() => Provider.of<CategoriaCultivoProvider>(context, listen: false).fetchAll());
     // Future.microtask(() => Provider.of<UbicacionProvider>(context, listen: false).fetchAll());

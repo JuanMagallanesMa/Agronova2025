@@ -20,12 +20,14 @@ class _PaginaAgricultoresState extends State<PaginaAgricultores> {
   @override
   void initState() {
     super.initState();
-    Future.microtask(
-      () => Provider.of<AgricultorProvider>(
-        context,
-        listen: false,
-      ).fetchAgricultores(),
-    );
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        Provider.of<AgricultorProvider>(
+          context,
+          listen: false,
+        ).fetchAgricultores();
+      }
+    });
   }
 
   void _navigateToRegistro([Agricultor? agricultor]) {

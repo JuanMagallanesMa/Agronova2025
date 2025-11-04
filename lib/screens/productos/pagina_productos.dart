@@ -20,12 +20,11 @@ class _PaginaProductosState extends State<PaginaProductos> {
   @override
   void initState() {
     super.initState();
-    Future.microtask(
-      () => Provider.of<ProductoProvider>(
-        context,
-        listen: false,
-      ).fetchProductos(),
-    );
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        Provider.of<ProductoProvider>(context, listen: false).fetchProductos();
+      }
+    });
   }
 
   void _navigateToRegistro([Producto? producto]) {

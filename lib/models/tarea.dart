@@ -1,5 +1,5 @@
 // lib/models/tarea.dart
-// Utiliza IDs para referencias N:1 y N:M
+import 'package:agronova_app/core/app_constants.dart';
 
 class Tarea {
   String? id;
@@ -38,7 +38,7 @@ class Tarea {
       idCultivo: data['idCultivo'] as String? ?? '',
       fechaInicio: DateTime.parse(data['fechaInicio'] as String),
       fechaFin: DateTime.parse(data['fechaFin'] as String),
-      estado: data['estado'] as String? ?? 'Pendiente',
+      estado: data['estado'] as String? ?? AppStatus.pendiente,
       idAgricultores: List<String>.from(data['idAgricultores'] ?? []),
       idInsumos: List<String>.from(data['idInsumos'] ?? []),
     );
@@ -58,5 +58,33 @@ class Tarea {
       'idAgricultores': idAgricultores,
       'idInsumos': idInsumos,
     };
+  }
+
+  // --- CORRECCIÓN ---
+  // Se añade el método copyWith para permitir actualizaciones inmutables
+  Tarea copyWith({
+    String? id,
+    String? idTipoTarea,
+    String? nombre,
+    String? descripcion,
+    String? idCultivo,
+    DateTime? fechaInicio,
+    DateTime? fechaFin,
+    String? estado,
+    List<String>? idAgricultores,
+    List<String>? idInsumos,
+  }) {
+    return Tarea(
+      id: id ?? this.id,
+      idTipoTarea: idTipoTarea ?? this.idTipoTarea,
+      nombre: nombre ?? this.nombre,
+      descripcion: descripcion ?? this.descripcion,
+      idCultivo: idCultivo ?? this.idCultivo,
+      fechaInicio: fechaInicio ?? this.fechaInicio,
+      fechaFin: fechaFin ?? this.fechaFin,
+      estado: estado ?? this.estado,
+      idAgricultores: idAgricultores ?? this.idAgricultores,
+      idInsumos: idInsumos ?? this.idInsumos,
+    );
   }
 }

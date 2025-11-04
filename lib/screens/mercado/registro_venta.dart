@@ -7,8 +7,7 @@ import 'package:agronova_app/providers/venta_provider.dart';
 import 'package:agronova_app/providers/producto_provider.dart';
 import 'package:agronova_app/widgets/layout/main_scaffold.dart';
 import 'package:agronova_app/widgets/shared/action_button.dart';
-import 'package:agronova_app/widgets/forms/date_input_field.dart';
-import 'package:agronova_app/widgets/forms/numeric_input_field.dart';
+// import 'package:agronova_app/widgets/forms/date_input_field.dart'; // <-- CORRECCIÓN: Eliminado
 import 'package:agronova_app/core/app_constants.dart';
 
 class RegistroVenta extends StatefulWidget {
@@ -25,12 +24,13 @@ class _RegistroVentaState extends State<RegistroVenta> {
   bool _isEditing = false;
 
   // Variables de Venta
-  DateTime _fecha = DateTime.now();
+  // DateTime _fecha = DateTime.now(); // <-- CORRECCIÓN: Eliminado
   String _nombreCliente = '';
+  String _cedula = '';
   double _totalVenta = 0.0;
   List<VentaDetalle> _detalles = [];
 
-  // Controladores para la línea de detalle "nueva"
+  // Controladores
   Producto? _productoSeleccionado;
   final TextEditingController _cantidadController = TextEditingController();
 
@@ -40,8 +40,9 @@ class _RegistroVentaState extends State<RegistroVenta> {
     _isEditing = widget.venta != null;
     if (_isEditing) {
       final venta = widget.venta!;
-      _fecha = venta.fecha;
+      // _fecha = venta.fecha; // <-- CORRECCIÓN: Eliminado (Error undefined_getter)
       _nombreCliente = venta.nombreCliente;
+      _cedula = venta.cedula;
       _detalles = List<VentaDetalle>.from(venta.detalles);
       _calcularTotal();
     }
@@ -50,7 +51,7 @@ class _RegistroVentaState extends State<RegistroVenta> {
   void _calcularTotal() {
     double total = 0.0;
     for (var detalle in _detalles) {
-      total += detalle.subtotal;
+      total += (detalle.cantidad * detalle.precioCaja);
     }
     setState(() {
       _totalVenta = total;
@@ -60,8 +61,7 @@ class _RegistroVentaState extends State<RegistroVenta> {
   void _agregarDetalle() {
     if (_productoSeleccionado == null || _cantidadController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-            content: Text('Seleccione un producto y una cantidad.')),
+        const SnackBar(content: Text('Seleccione un producto y una cantidad.')),
       );
       return;
     }
@@ -70,27 +70,26 @@ class _RegistroVentaState extends State<RegistroVenta> {
 
     final producto = _productoSeleccionado!;
 
-    // Evitar duplicados, en su lugar, preguntar si desea actualizar
-    final existingIndex =
-        _detalles.indexWhere((d) => d.idProducto == producto.id);
+    final existingIndex = _detalles.indexWhere(
+      (d) => d.idProducto == producto.id,
+    );
     if (existingIndex != -1) {
-      // Por ahora, solo sumamos la cantidad
+      final oldDetalle = _detalles[existingIndex];
       setState(() {
-        _detalles[existingIndex] = _detalles[existingIndex].copyWith(
-          cantidad: _detalles[existingIndex].cantidad + cantidad,
-          subtotal: _detalles[existingIndex].subtotal + (cantidad * producto.precioCaja),
+        _detalles[existingIndex] = oldDetalle.copyWith(
+          cantidad: oldDetalle.cantidad + cantidad,
         );
       });
     } else {
-      // Agregar nuevo detalle
       setState(() {
-        _detalles.add(VentaDetalle(
-          idProducto: producto.id!,
-          nombreProducto: producto.nombre, // Guardamos el nombre para mostrar
-          cantidad: cantidad,
-          precioUnitario: producto.precioCaja,
-          subtotal: cantidad * producto.precioCaja,
-        ));
+        _detalles.add(
+          VentaDetalle(
+            idProducto: producto.id!,
+            nombreProducto: producto.nombre,
+            cantidad: cantidad,
+            precioCaja: producto.precioCaja,
+          ),
+        );
       });
     }
 
@@ -109,7 +108,7 @@ class _RegistroVentaState extends State<RegistroVenta> {
     setState(() {
       _productoSeleccionado = null;
       _cantidadController.clear();
-      FocusScope.of(context).unfocus(); // Ocultar teclado
+      FocusScope.of(context).unfocus();
     });
   }
 
@@ -130,8 +129,9 @@ class _RegistroVentaState extends State<RegistroVenta> {
 
     final ventaToSave = Venta(
       id: widget.venta?.id,
-      fecha: _fecha,
+      // fecha: _fecha, // <-- CORRECCIÓN: Eliminado
       nombreCliente: _nombreCliente,
+      cedula: _cedula,
       detalles: _detalles,
       total: _totalVenta,
       estado: widget.venta?.estado ?? AppStatus.activo,
@@ -139,7 +139,16 @@ class _RegistroVentaState extends State<RegistroVenta> {
 
     try {
       if (_isEditing) {
-        await provider.updateVenta(ventaToSave);
+        // Tu VentaProvider (venta_provider.dart) no tiene un método 'updateVenta'.
+        // Si necesitas editar, deberás añadir esa función en el provider.
+        // Por ahora, mostraremos un aviso.
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'La edición de ventas no está implementada en el provider.',
+            ),
+          ),
+        );
       } else {
         await provider.addVenta(ventaToSave);
       }
@@ -154,7 +163,9 @@ class _RegistroVentaState extends State<RegistroVenta> {
         );
       }
     } finally {
-      setState(() => _isSaving = false);
+      if (mounted) {
+        setState(() => _isSaving = false);
+      }
     }
   }
 
@@ -173,15 +184,12 @@ class _RegistroVentaState extends State<RegistroVenta> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
               // --- DATOS GENERALES ---
-              DateInputField(
-                label: 'Fecha de Venta',
-                selectedDate: _fecha,
-                onDateSelected: (date) => setState(() => _fecha = date),
-              ),
-              const SizedBox(height: 15),
+              // <-- CORRECCIÓN: DateInputField eliminado
               TextFormField(
                 initialValue: _nombreCliente,
-                decoration: const InputDecoration(labelText: 'Nombre del Cliente'),
+                decoration: const InputDecoration(
+                  labelText: 'Nombre del Cliente',
+                ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Ingrese el nombre del cliente.';
@@ -190,13 +198,29 @@ class _RegistroVentaState extends State<RegistroVenta> {
                 },
                 onSaved: (value) => _nombreCliente = value!,
               ),
+              const SizedBox(height: 15),
+              TextFormField(
+                initialValue: _cedula,
+                decoration: const InputDecoration(
+                  labelText: 'Cédula del Cliente',
+                ),
+                keyboardType: TextInputType.number,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Ingrese la cédula del cliente.';
+                  }
+                  return null;
+                },
+                onSaved: (value) => _cedula = value!,
+              ),
               const SizedBox(height: 20),
 
               // --- FORMULARIO DE DETALLE ---
-              const Text('Agregar Productos',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              const Text(
+                'Agregar Productos',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
               const SizedBox(height: 10),
-              
               if (productoProvider.isLoading)
                 const Center(child: Text('Cargando productos...'))
               else
@@ -209,10 +233,13 @@ class _RegistroVentaState extends State<RegistroVenta> {
                   items: productoProvider.productos.map((Producto p) {
                     return DropdownMenuItem<Producto>(
                       value: p,
-                      child: Text('${p.nombre} (\$${p.precioCaja.toStringAsFixed(2)})'),
+                      child: Text(
+                        '${p.nombre} (\$${p.precioCaja.toStringAsFixed(2)})',
+                      ),
                     );
                   }).toList(),
-                  onChanged: (value) => setState(() => _productoSeleccionado = value),
+                  onChanged: (value) =>
+                      setState(() => _productoSeleccionado = value),
                 ),
               const SizedBox(height: 15),
               Row(
@@ -244,12 +271,16 @@ class _RegistroVentaState extends State<RegistroVenta> {
               const SizedBox(height: 20),
 
               // --- LISTA DE DETALLES ---
-              const Text('Productos en la Venta',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              const Text(
+                'Productos en la Venta',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
               if (_detalles.isEmpty)
                 const Padding(
                   padding: EdgeInsets.all(16.0),
-                  child: Center(child: Text('Aún no hay productos en la venta.')),
+                  child: Center(
+                    child: Text('Aún no hay productos en la venta.'),
+                  ),
                 )
               else
                 ListView.builder(
@@ -258,19 +289,24 @@ class _RegistroVentaState extends State<RegistroVenta> {
                   itemCount: _detalles.length,
                   itemBuilder: (ctx, i) {
                     final detalle = _detalles[i];
+                    final subtotal = detalle.cantidad * detalle.precioCaja;
                     return ListTile(
-                      title: Text(detalle.nombreProducto ?? 'Producto (ID: ${detalle.idProducto})'),
+                      title: Text(detalle.nombreProducto),
                       subtitle: Text(
-                          '${detalle.cantidad} x \$${detalle.precioUnitario.toStringAsFixed(2)}'),
+                        '${detalle.cantidad} x \$${detalle.precioCaja.toStringAsFixed(2)}',
+                      ),
                       trailing: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Text(
-                            '\$${detalle.subtotal.toStringAsFixed(2)}',
+                            '\$${subtotal.toStringAsFixed(2)}',
                             style: const TextStyle(fontWeight: FontWeight.bold),
                           ),
                           IconButton(
-                            icon: const Icon(Icons.delete_outline, color: Colors.red),
+                            icon: const Icon(
+                              Icons.delete_outline,
+                              color: Colors.red,
+                            ),
                             onPressed: () => _eliminarDetalle(i),
                           ),
                         ],
@@ -278,7 +314,7 @@ class _RegistroVentaState extends State<RegistroVenta> {
                     );
                   },
                 ),
-              
+
               const Divider(thickness: 1.5, height: 30),
 
               // --- TOTAL ---

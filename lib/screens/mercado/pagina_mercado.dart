@@ -5,24 +5,26 @@ import 'package:agronova_app/providers/venta_provider.dart';
 import 'package:agronova_app/widgets/layout/main_scaffold.dart';
 import 'package:agronova_app/widgets/cards/card_venta.dart';
 import 'package:agronova_app/widgets/shared/loading_spinner.dart';
-import 'package:agronova_app/widgets/shared/delete_dialog.dart';
 import 'registro_venta.dart';
 
-class PaginaVentas extends StatefulWidget {
+// CORRECCIÓN: El nombre de la clase debe coincidir con el archivo
+class PaginaMercado extends StatefulWidget {
   static const String routeName = '/ventas';
-  const PaginaVentas({super.key});
+  const PaginaMercado({super.key});
 
   @override
-  State<PaginaVentas> createState() => _PaginaVentasState();
+  State<PaginaMercado> createState() => _PaginaMercadoState();
 }
 
-class _PaginaVentasState extends State<PaginaVentas> {
+class _PaginaMercadoState extends State<PaginaMercado> {
   @override
   void initState() {
     super.initState();
-    Future.microtask(
-      () => Provider.of<VentaProvider>(context, listen: false).fetchVentas(),
-    );
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        Provider.of<VentaProvider>(context, listen: false).fetchVentas();
+      }
+    });
   }
 
   void _navigateToRegistro([Venta? venta]) {
@@ -31,19 +33,35 @@ class _PaginaVentasState extends State<PaginaVentas> {
     );
   }
 
-  void _showDeleteDialog(BuildContext context, Venta venta) {
+  // --- CORRECCIÓN: Cambiar lógica de "Delete" a "Anular" ---
+  void _showAnularDialog(BuildContext context, Venta venta) {
     showDialog(
       context: context,
-      builder: (ctx) => DeleteDialog(
-        title: 'Eliminar Venta',
-        content:
-            '¿Está seguro que desea inactivar la venta a "${venta.nombreCliente}"?',
-        onConfirm: () {
-          Provider.of<VentaProvider>(
-            context,
-            listen: false,
-          ).deleteVenta(venta.id!);
-        },
+      // Usamos un AlertDialog estándar en lugar de DeleteDialog para personalizar el texto
+      builder: (ctx) => AlertDialog(
+        title: const Text('Anular Venta'),
+        content: Text(
+          '¿Está seguro que desea ANULAR la venta a "${venta.nombreCliente}"? Esta acción no se puede deshacer.',
+        ),
+        actions: <Widget>[
+          TextButton(
+            child: const Text('Cancelar'),
+            onPressed: () {
+              Navigator.of(ctx).pop();
+            },
+          ),
+          TextButton(
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            child: const Text('Anular'),
+            onPressed: () {
+              Provider.of<VentaProvider>(
+                context,
+                listen: false,
+              ).anularVenta(venta.id!); // <-- Llamar a anularVenta
+              Navigator.of(ctx).pop();
+            },
+          ),
+        ],
       ),
     );
   }
@@ -68,10 +86,9 @@ class _PaginaVentasState extends State<PaginaVentas> {
                 final venta = ventaProvider.ventas[i];
                 return CardVenta(
                   venta: venta,
-                  // Asumiendo que CardVenta tiene onEdit y onDelete
-                  // Si no los tiene, deberás agregarlos a card_venta.dart
-                  onEdit: () => _navigateToRegistro(venta),
-                  onDelete: () => _showDeleteDialog(context, venta),
+
+                  // --- CORRECCIÓN: Pasar los parámetros correctos ---
+                  onAnular: () => _showAnularDialog(context, venta),
                 );
               },
             ),

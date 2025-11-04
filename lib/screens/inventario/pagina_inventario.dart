@@ -21,13 +21,17 @@ class _PaginaInventarioState extends State<PaginaInventario> {
   @override
   void initState() {
     super.initState();
-    Future.microtask(
-      () => Provider.of<InsumoProvider>(context, listen: false).fetchInsumos(),
-    );
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        Provider.of<InsumoProvider>(context, listen: false).fetchInsumos();
+      }
+    });
     // Carga los catálogos si no están cargados
-    Future.microtask(
-      () => Provider.of<TipoInsumoProvider>(context, listen: false).fetchAll(),
-    );
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        Provider.of<TipoInsumoProvider>(context, listen: false).fetchAll();
+      }
+    });
   }
 
   void _navigateToRegistro([Insumo? insumo]) {

@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:agronova_app/models/tarea.dart';
 // Import necesario para los estados
-import 'package:agronova_app/core/app_constants.dart'; 
+import 'package:agronova_app/core/app_constants.dart';
 import 'package:agronova_app/widgets/layout/main_scaffold.dart';
 import 'package:agronova_app/widgets/cards/card_tarea.dart';
 import 'package:agronova_app/widgets/shared/loading_spinner.dart';
@@ -23,19 +23,16 @@ class _PaginaTareasState extends State<PaginaTareas> {
   @override
   void initState() {
     super.initState();
-    Future.microtask(
-      () => Provider.of<TareaProvider>(
-        context,
-        listen: false,
-      ).fetchTareas(),
-    );
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        Provider.of<TareaProvider>(context, listen: false).fetchTareas();
+      }
+    });
   }
 
   void _navigateToRegistro([Tarea? tarea]) {
     Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => RegistroTarea(tarea: tarea),
-      ),
+      MaterialPageRoute(builder: (context) => RegistroTarea(tarea: tarea)),
     );
   }
 
@@ -63,7 +60,8 @@ class _PaginaTareasState extends State<PaginaTareas> {
       builder: (ctx) => AlertDialog(
         title: const Text('Completar Tarea'),
         content: Text(
-            '¿Está seguro que desea marcar la tarea "${tarea.nombre}" como completada?'),
+          '¿Está seguro que desea marcar la tarea "${tarea.nombre}" como completada?',
+        ),
         actions: <Widget>[
           TextButton(
             child: const Text('Cancelar'),
@@ -75,8 +73,7 @@ class _PaginaTareasState extends State<PaginaTareas> {
             child: const Text('Confirmar'),
             onPressed: () {
               // Usamos copyWith para crear una nueva instancia solo con el estado cambiado
-              final updatedTask =
-                  tarea.copyWith(estado: AppStatus.completado);
+              final updatedTask = tarea.copyWith(estado: AppStatus.completada);
 
               Provider.of<TareaProvider>(
                 context,
@@ -105,25 +102,25 @@ class _PaginaTareasState extends State<PaginaTareas> {
       body: tareaProvider.isLoading
           ? const LoadingSpinner()
           : tareaProvider.tareas.isEmpty
-              ? const Center(
-                  // Corrección de texto: "activos" -> "activas"
-                  child: Text('No hay tareas activas registradas.'),
-                )
-              : ListView.builder(
-                  itemCount: tareaProvider.tareas.length,
-                  itemBuilder: (ctx, i) {
-                    final tarea = tareaProvider.tareas[i];
-                    return CardTarea(
-                      tarea: tarea,
-                      onEdit: () => _navigateToRegistro(tarea),
-                      onDelete: () => _showDeleteDialog(context, tarea),
-                      // --- CORREGIDO ---
-                      // Se implementa la llamada a la función de completar
-                      onMarkCompleted: () => _showCompleteDialog(context, tarea),
-                      // --- FIN CORREGIDO ---
-                    );
-                  },
-                ),
+          ? const Center(
+              // Corrección de texto: "activos" -> "activas"
+              child: Text('No hay tareas activas registradas.'),
+            )
+          : ListView.builder(
+              itemCount: tareaProvider.tareas.length,
+              itemBuilder: (ctx, i) {
+                final tarea = tareaProvider.tareas[i];
+                return CardTarea(
+                  tarea: tarea,
+                  onEdit: () => _navigateToRegistro(tarea),
+                  onDelete: () => _showDeleteDialog(context, tarea),
+                  // --- CORREGIDO ---
+                  // Se implementa la llamada a la función de completar
+                  onMarkCompleted: () => _showCompleteDialog(context, tarea),
+                  // --- FIN CORREGIDO ---
+                );
+              },
+            ),
     );
   }
 }

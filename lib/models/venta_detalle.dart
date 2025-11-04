@@ -1,7 +1,7 @@
 class VentaDetalle {
   final String idProducto;
   final String nombreProducto;
-  final double precioCaja;
+  final double precioCaja; // Este es el precio unitario
   final int cantidad;
 
   VentaDetalle({
@@ -29,5 +29,21 @@ class VentaDetalle {
       'precioCaja': precioCaja,
       'cantidad': cantidad,
     };
+  }
+
+  // --- CORRECCIÓN ---
+  // Se añade copyWith para actualizar la cantidad en el formulario de registro
+  VentaDetalle copyWith({
+    String? idProducto,
+    String? nombreProducto,
+    double? precioCaja,
+    int? cantidad,
+  }) {
+    return VentaDetalle(
+      idProducto: idProducto ?? this.idProducto,
+      nombreProducto: nombreProducto ?? this.nombreProducto,
+      precioCaja: precioCaja ?? this.precioCaja,
+      cantidad: cantidad ?? this.cantidad,
+    );
   }
 }
