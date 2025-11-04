@@ -1,7 +1,8 @@
 import 'package:agronova_app/pagina_inicio.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:intl/date_symbol_data_local.dart';
+import 'firebase_options.dart';
 
 // Importar todos los Providers
 import 'package:agronova_app/providers/agricultor_provider.dart';
@@ -28,7 +29,9 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   // Inicializa la localización para formatos de fecha (ej. 'es_CO')
-  await initializeDateFormatting('es_CO', null);
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
 
   runApp(const AppState());
 }

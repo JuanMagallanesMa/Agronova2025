@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "943794666363",
+    "project_id": "agronova-backend",
+    "storage_bucket": "agronova-backend.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:943794666363:android:dba9beacd362f7e5615bde",
+        "android_client_info": {
+          "package_name": "com.example.agronova_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAdp37qkXgOxLtU7aPHxrkhdf1qPrQ2J44"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
