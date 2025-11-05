@@ -43,6 +43,16 @@ class Producto {
     };
   }
 
+  Map<String, dynamic> toUpdateMap() {
+    return {
+      'nombre': nombre,
+      'descripcion': descripcion,
+      'cantidadStock': cantidadStock,
+      'precioCaja': precioCaja,
+      'idCultivo': idCultivo,
+    };
+  }
+
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||

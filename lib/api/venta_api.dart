@@ -22,6 +22,6 @@ class VentaApi extends HttpClient {
     if (id.isEmpty) {
       throw Exception('ID de Venta requerido para actualizar el estado.');
     }
-    await put(_endpoint, id, {'estado': nuevoEstado});
+    await delete(_endpoint, id);
   }
 }

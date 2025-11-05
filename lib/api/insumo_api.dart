@@ -18,7 +18,7 @@ class InsumoApi extends HttpClient {
     if (insumo.id == null) {
       throw Exception('ID de Insumo requerido para actualizar.');
     }
-    await put(_endpoint, insumo.id!, insumo.toMap());
+    await put(_endpoint, insumo.id!, insumo.toUpdateMap());
   }
 
   // Eliminación Lógica
@@ -26,6 +26,6 @@ class InsumoApi extends HttpClient {
     if (id.isEmpty) {
       throw Exception('ID de Insumo requerido para actualizar el estado.');
     }
-    await put(_endpoint, id, {'estado': nuevoEstado});
+    await delete(_endpoint, id);
   }
 }

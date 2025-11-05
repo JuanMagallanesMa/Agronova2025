@@ -8,7 +8,7 @@ import 'package:agronova_app/screens/cultivos/pagina_cultivos.dart';
 import 'package:agronova_app/screens/inventario/pagina_inventario.dart';
 import 'package:agronova_app/screens/mercado/pagina_mercado.dart';
 import 'package:agronova_app/screens/tareas/pagina_tareas.dart';
-import 'package:agronova_app/screens/catalogos/pagina_catalogo.dart'; // Importamos la página genérica
+import 'package:agronova_app/screens/catalogos/pagina_catalogo.dart';
 import 'package:agronova_app/models/categoria_cultivo.dart';
 import 'package:agronova_app/models/tipo_insumo.dart';
 import 'package:agronova_app/models/tipo_tarea.dart';
@@ -25,7 +25,6 @@ class CustomDrawer extends StatelessWidget {
   Widget build(BuildContext context) {
     return Drawer(
       child: ListView(
-        // Cambiado a ListView para permitir el scroll
         padding: EdgeInsets.zero,
         children: <Widget>[
           const DrawerHeader(
@@ -37,7 +36,6 @@ class CustomDrawer extends StatelessWidget {
               ),
             ),
           ),
-          /** */
           ListTile(
             leading: const Icon(Icons.home),
             title: const Text('Inicio'),
@@ -46,7 +44,6 @@ class CustomDrawer extends StatelessWidget {
               Navigator.pushReplacementNamed(context, PaginaInicio.routeName);
             },
           ),
-
           const Divider(),
           const Padding(
             padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
@@ -87,7 +84,6 @@ class CustomDrawer extends StatelessWidget {
               Navigator.pushNamed(context, PaginaMercado.routeName);
             },
           ),
-
           const Divider(),
           ExpansionTile(
             leading: const Icon(Icons.settings),
@@ -100,11 +96,10 @@ class CustomDrawer extends StatelessWidget {
                   Navigator.pop(context);
                   Navigator.of(context).push(
                     MaterialPageRoute(
-                      builder: (_) =>
-                          const PaginaCatalogo<
-                            CategoriaCultivo,
-                            CategoriaCultivoProvider
-                          >(title: 'Categoría de Cultivo'),
+                      builder: (_) => PaginaCatalogo<CategoriaCultivo, CategoriaCultivoProvider>(
+                        title: 'Categoría de Cultivo',
+                        itemFactory: (ref) => CategoriaCultivo.fromReferenciaBase(ref),
+                      ),
                     ),
                   );
                 },
@@ -116,10 +111,10 @@ class CustomDrawer extends StatelessWidget {
                   Navigator.pop(context);
                   Navigator.of(context).push(
                     MaterialPageRoute(
-                      builder: (_) =>
-                          const PaginaCatalogo<Ubicacion, UbicacionProvider>(
-                            title: 'Ubicación',
-                          ),
+                      builder: (_) => PaginaCatalogo<Ubicacion, UbicacionProvider>(
+                        title: 'Ubicación',
+                        itemFactory: (ref) => Ubicacion.fromReferenciaBase(ref),
+                      ),
                     ),
                   );
                 },
@@ -131,10 +126,10 @@ class CustomDrawer extends StatelessWidget {
                   Navigator.pop(context);
                   Navigator.of(context).push(
                     MaterialPageRoute(
-                      builder: (_) =>
-                          const PaginaCatalogo<TipoInsumo, TipoInsumoProvider>(
-                            title: 'Tipo de Insumo',
-                          ),
+                      builder: (_) => PaginaCatalogo<TipoInsumo, TipoInsumoProvider>(
+                        title: 'Tipo de Insumo',
+                        itemFactory: (ref) => TipoInsumo.fromReferenciaBase(ref),
+                      ),
                     ),
                   );
                 },
@@ -146,10 +141,10 @@ class CustomDrawer extends StatelessWidget {
                   Navigator.pop(context);
                   Navigator.of(context).push(
                     MaterialPageRoute(
-                      builder: (_) =>
-                          const PaginaCatalogo<TipoTarea, TipoTareaProvider>(
-                            title: 'Tipo de Tarea',
-                          ),
+                      builder: (_) => PaginaCatalogo<TipoTarea, TipoTareaProvider>(
+                        title: 'Tipo de Tarea',
+                        itemFactory: (ref) => TipoTarea.fromReferenciaBase(ref),
+                      ),
                     ),
                   );
                 },

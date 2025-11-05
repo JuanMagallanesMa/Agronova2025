@@ -36,9 +36,7 @@ class CategoriaCultivoProvider extends ChangeNotifier
   Future<void> add(CategoriaCultivo item) async {
     try {
       final itemToSend = CategoriaCultivo(
-        id: item.id,
         nombre: item.nombre,
-        estado: AppStatus.activo,
       );
       final newItem = await _api.add(itemToSend);
       _items.add(newItem);

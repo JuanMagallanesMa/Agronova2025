@@ -25,7 +25,7 @@ class RegistroTipoInsumo extends StatelessWidget {
           nombre: item.nombre,
           estado: item.estado,
         );
-        return item.id.isEmpty
+        return item.id!.isEmpty
             ? provider.add(itemEspecifico)
             : provider.update(itemEspecifico);
       },

@@ -9,7 +9,8 @@ class AgricultorProvider extends ChangeNotifier {
   List<Agricultor> _agricultores = [];
   bool _isLoading = false;
 
-  List<Agricultor> get agricultores => _agricultores.where((a) => a.estado == AppStatus.activo).toList();
+  List<Agricultor> get agricultores =>
+      _agricultores.where((a) => a.estado == AppStatus.activo).toList();
   bool get isLoading => _isLoading;
 
   Future<void> fetchAgricultores() async {
@@ -25,7 +26,6 @@ class AgricultorProvider extends ChangeNotifier {
     }
   }
 
-  // CORRECCIÓN: Crea una nueva instancia con el estado forzado.
   Future<void> addAgricultor(Agricultor agricultor) async {
     try {
       final itemToSend = Agricultor(
@@ -57,21 +57,23 @@ class AgricultorProvider extends ChangeNotifier {
     }
   }
 
-  // Eliminación Lógica: Crea nueva instancia y la reemplaza.
+  // --- CAMBIO AQUÍ ---
   Future<void> deleteAgricultor(String id) async {
     try {
-      await _api.updateEstado(id, AppStatus.inactivo);
-      
+      // Llama al nuevo método de la API que envía un DELETE
+      await _api.deleteLogico(id);
+
       final index = _agricultores.indexWhere((a) => a.id == id);
       if (index != -1) {
         final oldItem = _agricultores[index];
-        final updatedItem = Agricultor( 
+        // Actualiza el estado localmente para que desaparezca de la UI
+        final updatedItem = Agricultor(
           id: oldItem.id,
           nombre: oldItem.nombre,
           edad: oldItem.edad,
           zona: oldItem.zona,
           experiencia: oldItem.experiencia,
-          estado: AppStatus.inactivo, 
+          estado: AppStatus.inactivo, // <-- Sigue siendo borrado lógico
         );
         _agricultores[index] = updatedItem;
       }
@@ -80,6 +82,7 @@ class AgricultorProvider extends ChangeNotifier {
       debugPrint('Error deleting agricultor logically: $e');
     }
   }
+  // --------------------
 
   List<Agricultor> searchAgricultores(String query) {
     if (query.isEmpty) return agricultores;

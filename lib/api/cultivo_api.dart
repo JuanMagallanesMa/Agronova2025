@@ -18,7 +18,7 @@ class CultivoApi extends HttpClient {
     if (cultivo.id == null) {
       throw Exception('ID de Cultivo requerido para actualizar.');
     }
-    await put(_endpoint, cultivo.id!, cultivo.toMap());
+    await put(_endpoint, cultivo.id!, cultivo.toUpdateMap());
   }
 
   // Eliminación Lógica
@@ -26,6 +26,6 @@ class CultivoApi extends HttpClient {
     if (id.isEmpty) {
       throw Exception('ID de Cultivo requerido para actualizar el estado.');
     }
-    await put(_endpoint, id, {'estado': nuevoEstado});
+    await delete(_endpoint, id);
   }
 }

@@ -1,3 +1,4 @@
+// lib/api/agricultor_api.dart
 import 'http_client.dart';
 import 'package:agronova_app/models/agricultor.dart';
 
@@ -21,12 +22,15 @@ class AgricultorApi extends HttpClient {
     await put(_endpoint, agricultor.id!, agricultor.toMap());
   }
 
-  // Eliminación Lógica
-  Future<void> updateEstado(String id, String nuevoEstado) async {
+  // --- CAMBIO AQUÍ ---
+  // Ahora llamamos a 'delete', que el backend interpreta como borrado lógico
+  Future<void> deleteLogico(String id) async {
     if (id.isEmpty) {
-      throw Exception('ID de Agricultor requerido para actualizar el estado.');
+      throw Exception('ID de Agricultor requerido para borrado lógico.');
     }
-    // El backend debe manejar este PUT para solo modificar el campo 'estado'.
-    await put(_endpoint, id, {'estado': nuevoEstado});
+    // Llama al nuevo método delete en http_client
+    await delete(_endpoint, id);
   }
+
+  // --------------------
 }

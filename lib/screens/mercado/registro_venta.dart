@@ -24,7 +24,7 @@ class _RegistroVentaState extends State<RegistroVenta> {
   bool _isEditing = false;
 
   // Variables de Venta
-  // DateTime _fecha = DateTime.now(); // <-- CORRECCIÓN: Eliminado
+  final DateTime _fecha = DateTime.now(); // <-- CORRECCIÓN: Eliminado
   String _nombreCliente = '';
   String _cedula = '';
   double _totalVenta = 0.0;
@@ -51,7 +51,7 @@ class _RegistroVentaState extends State<RegistroVenta> {
   void _calcularTotal() {
     double total = 0.0;
     for (var detalle in _detalles) {
-      total += (detalle.cantidad * detalle.precioCaja);
+      total += (detalle.cantidad * detalle.precioUnitario);
     }
     setState(() {
       _totalVenta = total;
@@ -87,7 +87,7 @@ class _RegistroVentaState extends State<RegistroVenta> {
             idProducto: producto.id!,
             nombreProducto: producto.nombre,
             cantidad: cantidad,
-            precioCaja: producto.precioCaja,
+            precioUnitario: producto.precioCaja,
           ),
         );
       });
@@ -129,7 +129,7 @@ class _RegistroVentaState extends State<RegistroVenta> {
 
     final ventaToSave = Venta(
       id: widget.venta?.id,
-      // fecha: _fecha, // <-- CORRECCIÓN: Eliminado
+      fecha: _fecha, // <-- CORRECCIÓN: Eliminado
       nombreCliente: _nombreCliente,
       cedula: _cedula,
       detalles: _detalles,
@@ -289,11 +289,11 @@ class _RegistroVentaState extends State<RegistroVenta> {
                   itemCount: _detalles.length,
                   itemBuilder: (ctx, i) {
                     final detalle = _detalles[i];
-                    final subtotal = detalle.cantidad * detalle.precioCaja;
+                    final subtotal = detalle.cantidad * detalle.precioUnitario;
                     return ListTile(
                       title: Text(detalle.nombreProducto),
                       subtitle: Text(
-                        '${detalle.cantidad} x \$${detalle.precioCaja.toStringAsFixed(2)}',
+                        '${detalle.cantidad} x \$${detalle.precioUnitario.toStringAsFixed(2)}',
                       ),
                       trailing: Row(
                         mainAxisSize: MainAxisSize.min,

@@ -3,7 +3,6 @@ import 'package:agronova_app/models/cultivo.dart';
 import 'package:agronova_app/providers/categoria_cultivo_provider.dart';
 import 'package:agronova_app/providers/ubicacion_provider.dart';
 import 'package:provider/provider.dart';
-import 'package:intl/intl.dart';
 import 'package:agronova_app/models/categoria_cultivo.dart';
 import 'package:agronova_app/models/ubicacion.dart';
 
@@ -63,9 +62,6 @@ class CardCultivo extends StatelessWidget {
           children: [
             Text('Categoría: $categoriaNombre'),
             Text('Ubicación: $ubicacionNombre'),
-            Text(
-              'Inicio: ${DateFormat('yyyy-MM-dd').format(cultivo.fechaInicio)}',
-            ),
           ],
         ),
         trailing: Row(

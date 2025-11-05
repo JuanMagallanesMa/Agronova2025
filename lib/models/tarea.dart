@@ -60,6 +60,20 @@ class Tarea {
     };
   }
 
+  Map<String, dynamic> toUpdateCompleteMap() {
+    return {
+      'idTipoTarea': idTipoTarea,
+      'nombre': nombre,
+      'descripcion': descripcion,
+      'idCultivo': idCultivo,
+      'fechaInicio': fechaInicio.toIso8601String().split('T').first,
+      'fechaFin': fechaFin.toIso8601String().split('T').first,
+      'estado': AppStatus.completada,
+      'idAgricultores': idAgricultores,
+      'idInsumos': idInsumos,
+    };
+  }
+
   // --- CORRECCIÓN ---
   // Se añade el método copyWith para permitir actualizaciones inmutables
   Tarea copyWith({

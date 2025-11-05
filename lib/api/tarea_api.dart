@@ -22,11 +22,18 @@ class TareaApi extends HttpClient {
     await put(_endpoint, tarea.id!, tarea.toMap());
   }
 
+  Future<void> updateComplete(Tarea tarea) async {
+    if (tarea.id == null) {
+      throw Exception('ID de Tarea requerido para actualizar.');
+    }
+    await put(_endpoint, tarea.id!, tarea.toUpdateCompleteMap());
+  }
+
   // Eliminación Lógica
   Future<void> updateEstado(String id, String nuevoEstado) async {
     if (id.isEmpty) {
       throw Exception('ID de Tarea requerido para actualizar el estado.');
     }
-    await put(_endpoint, id, {'estado': nuevoEstado});
+    await delete(_endpoint, id);
   }
 }

@@ -51,7 +51,7 @@ class TareaProvider extends ChangeNotifier {
 
   Future<void> updateTarea(Tarea tarea) async {
     try {
-      await _api.update(tarea);
+      await _api.updateComplete(tarea);
       final index = _tareas.indexWhere((t) => t.id == tarea.id);
       if (index != -1) {
         _tareas[index] = tarea;

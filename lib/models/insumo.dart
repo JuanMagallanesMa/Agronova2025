@@ -39,6 +39,15 @@ class Insumo {
     };
   }
 
+  Map<String, dynamic> toUpdateMap() {
+    return {
+      'idTipoInsumo': idTipoInsumo,
+      'descripcion': descripcion,
+      'cantidad': cantidad,
+      'unidadMedida': unidadMedida,
+    };
+  }
+
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||

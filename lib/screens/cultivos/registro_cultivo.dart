@@ -6,7 +6,6 @@ import 'package:agronova_app/providers/categoria_cultivo_provider.dart';
 import 'package:agronova_app/providers/ubicacion_provider.dart';
 import 'package:agronova_app/widgets/layout/main_scaffold.dart';
 import 'package:agronova_app/widgets/shared/action_button.dart';
-import 'package:agronova_app/widgets/forms/date_input_field.dart';
 import 'package:agronova_app/widgets/forms/form_dropdown_catalogo.dart';
 import 'package:agronova_app/core/app_constants.dart';
 
@@ -28,7 +27,6 @@ class _RegistroCultivoState extends State<RegistroCultivo> {
   String _nombre = '';
   String _idCategoria = '';
   String _idUbicacion = '';
-  DateTime? _fechaInicio;
 
   @override
   void initState() {
@@ -39,13 +37,11 @@ class _RegistroCultivoState extends State<RegistroCultivo> {
           nombre: '',
           idCategoria: '',
           idUbicacion: '',
-          fechaInicio: DateTime.now(),
         );
 
     _nombre = _editedCultivo.nombre;
     _idCategoria = _editedCultivo.idCategoria;
     _idUbicacion = _editedCultivo.idUbicacion;
-    _fechaInicio = _editedCultivo.fechaInicio;
   }
 
   Future<void> _saveForm() async {
@@ -63,7 +59,6 @@ class _RegistroCultivoState extends State<RegistroCultivo> {
       nombre: _nombre,
       idCategoria: _idCategoria,
       idUbicacion: _idUbicacion,
-      fechaInicio: _fechaInicio!,
       estado: _editedCultivo.estado ?? AppStatus.activo,
     );
 
@@ -151,18 +146,6 @@ class _RegistroCultivoState extends State<RegistroCultivo> {
               if (ubicacionProvider.isLoading)
                 const Center(child: Text('Cargando ubicaciones...')),
               const SizedBox(height: 15),
-
-              // Campo Fecha de Inicio
-              DateInputField(
-                label: 'Fecha de Inicio',
-                selectedDate: _fechaInicio,
-                onDateSelected: (date) {
-                  setState(() {
-                    _fechaInicio = date;
-                  });
-                },
-              ),
-              const SizedBox(height: 30),
 
               ActionButton(
                 text: isEditing ? 'Guardar Cambios' : 'Registrar Cultivo',

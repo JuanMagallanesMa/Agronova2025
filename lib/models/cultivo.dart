@@ -3,7 +3,6 @@ class Cultivo {
   String nombre;
   String idCategoria; // Foreign Key: CategoriaCultivo
   String idUbicacion; // Foreign Key: Ubicacion
-  DateTime fechaInicio;
   String? estado;
 
   Cultivo({
@@ -11,7 +10,6 @@ class Cultivo {
     required this.nombre,
     required this.idCategoria,
     required this.idUbicacion,
-    required this.fechaInicio,
     this.estado,
   });
 
@@ -22,7 +20,6 @@ class Cultivo {
       nombre: data['nombre'] as String? ?? '',
       idCategoria: data['idCategoria'] as String? ?? '',
       idUbicacion: data['idUbicacion'] as String? ?? '',
-      fechaInicio: DateTime.parse(data['fechaInicio'] as String),
       estado: data['estado'] as String?,
     );
   }
@@ -34,8 +31,15 @@ class Cultivo {
       'nombre': nombre,
       'idCategoria': idCategoria,
       'idUbicacion': idUbicacion,
-      'fechaInicio': fechaInicio.toIso8601String().split('T').first,
       if (estado != null) 'estado': estado,
+    };
+  }
+
+  Map<String, dynamic> toUpdateMap() {
+    return {
+      'nombre': nombre,
+      'idCategoria': idCategoria,
+      'idUbicacion': idUbicacion,
     };
   }
 

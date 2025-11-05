@@ -35,7 +35,8 @@ class VentaProvider extends ChangeNotifier {
         cedula: venta.cedula,
         total: venta.total,
         detalles: venta.detalles,
-        estado: AppStatus.completada, // <--- Estado forzado
+        estado: AppStatus.completada, 
+        fecha: DateTime.now(), 
       );
       final newVenta = await _api.add(itemToSend);
       _ventas.add(newVenta);
@@ -59,7 +60,7 @@ class VentaProvider extends ChangeNotifier {
           cedula: oldItem.cedula,
           total: oldItem.total,
           detalles: oldItem.detalles,
-          estado: AppStatus.anulada,
+          estado: AppStatus.anulada, fecha: DateTime.now(),
         );
         _ventas[index] = updatedItem;
       }

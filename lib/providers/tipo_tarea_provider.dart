@@ -4,16 +4,17 @@ import '../api/tipo_tarea_api.dart';
 import '../core/app_constants.dart';
 import '../core/provider_interfaces.dart'; // <--- Importación de la interfaz
 
-class TipoTareaProvider 
-    extends ChangeNotifier
-    implements IReferenciaProvider<TipoTarea> { // <--- Implementación de la Interfaz
-  
+class TipoTareaProvider extends ChangeNotifier
+    implements IReferenciaProvider<TipoTarea> {
+  // <--- Implementación de la Interfaz
+
   final TipoTareaApi _api = TipoTareaApi();
   List<TipoTarea> _items = [];
   bool _isLoading = false;
 
   @override
-  List<TipoTarea> get items => _items.where((i) => i.estado == AppStatus.activo).toList();
+  List<TipoTarea> get items =>
+      _items.where((i) => i.estado == AppStatus.activo).toList();
   @override
   bool get isLoading => _isLoading;
 
@@ -34,11 +35,7 @@ class TipoTareaProvider
   @override
   Future<void> add(TipoTarea item) async {
     try {
-      final itemToSend = TipoTarea(
-        id: item.id,
-        nombre: item.nombre,
-        estado: AppStatus.activo,
-      );
+      final itemToSend = TipoTarea(nombre: item.nombre);
       final newItem = await _api.add(itemToSend);
       _items.add(newItem);
       notifyListeners();
@@ -65,14 +62,14 @@ class TipoTareaProvider
   Future<void> deleteLogico(String id) async {
     try {
       await _api.updateEstado(id, AppStatus.inactivo);
-      
+
       final index = _items.indexWhere((i) => i.id == id);
       if (index != -1) {
         final oldItem = _items[index];
-        final updatedItem = TipoTarea( 
+        final updatedItem = TipoTarea(
           id: oldItem.id,
           nombre: oldItem.nombre,
-          estado: AppStatus.inactivo, 
+          estado: AppStatus.inactivo,
         );
         _items[index] = updatedItem;
       }

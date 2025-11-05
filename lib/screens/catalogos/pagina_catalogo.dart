@@ -8,12 +8,16 @@ import 'package:agronova_app/widgets/shared/delete_dialog.dart';
 import 'registro_catalogo.dart';
 import 'package:agronova_app/core/provider_interfaces.dart';
 
-// P es el tipo de Provider que estamos usando (ej: CategoriaCultivoProvider)
 class PaginaCatalogo<T extends ReferenciaBase, P extends IReferenciaProvider<T>>
     extends StatefulWidget {
   final String title;
+  final T Function(ReferenciaBase) itemFactory;
 
-  const PaginaCatalogo({super.key, required this.title});
+  const PaginaCatalogo({
+    super.key,
+    required this.title,
+    required this.itemFactory,
+  });
 
   @override
   State<PaginaCatalogo<T, P>> createState() => _PaginaCatalogoState<T, P>();
@@ -24,22 +28,18 @@ class _PaginaCatalogoState<
   P extends IReferenciaProvider<T>
 >
     extends State<PaginaCatalogo<T, P>> {
-  // Helper para obtener el provider ya casteado
   IReferenciaProvider<T> _getProvider(
     BuildContext context, {
     bool listen = false,
   }) {
-    // El casteo es seguro porque forzamos el tipo P a extender IReferenciaProvider<T>
     return Provider.of<P>(context, listen: listen) as IReferenciaProvider<T>;
   }
 
   @override
   void initState() {
     super.initState();
-    // Llamamos a fetchAll() de forma segura.
     Future.microtask(() {
       if (mounted) {
-        // Chequeo de mounted
         _getProvider(context, listen: false).fetchAll();
       }
     });
@@ -48,17 +48,18 @@ class _PaginaCatalogoState<
   void _navigateToRegistro([T? item]) {
     final provider = _getProvider(context, listen: false);
 
-    // FUNCIÓN DE GUARDADO DECLARADA LOCALMENTE (Resuelve warning de closure)
     Future<void> onSave(ReferenciaBase itemToSave) async {
-      final isEditing = itemToSave.id.isNotEmpty;
+      // Convertir ReferenciaBase a T usando el factory
+      final typedItem = widget.itemFactory(itemToSave);
+
+      final isEditing = typedItem.id!.isNotEmpty;
       if (isEditing) {
-        await provider.update(itemToSave as T);
+        await provider.update(typedItem);
       } else {
-        await provider.add(itemToSave as T);
+        await provider.add(typedItem);
       }
     }
 
-    // NOTA: El form de registro necesita saber cómo crear T
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (context) => RegistroCatalogo<T>(
@@ -78,7 +79,7 @@ class _PaginaCatalogoState<
         content:
             '¿Está seguro que desea inactivar "${item.nombre}"? Se mantendrá en el historial pero no estará disponible para nuevos registros.',
         onConfirm: () {
-          _getProvider(context, listen: false).deleteLogico(item.id);
+          _getProvider(context, listen: false).deleteLogico(item.id!);
         },
       ),
     );
@@ -86,7 +87,6 @@ class _PaginaCatalogoState<
 
   @override
   Widget build(BuildContext context) {
-    // Obtenemos el provider con listen: true para reconstruir el widget
     final provider = _getProvider(context, listen: true);
     final items = provider.items;
     final isLoading = provider.isLoading;

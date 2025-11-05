@@ -43,7 +43,6 @@ class CultivoProvider extends ChangeNotifier {
         nombre: cultivo.nombre,
         idCategoria: cultivo.idCategoria,
         idUbicacion: cultivo.idUbicacion,
-        fechaInicio: cultivo.fechaInicio,
         estado: AppStatus.activo, // <--- Estado forzado
       );
       final newCultivo = await _cultivoApi.add(itemToSend);
@@ -80,7 +79,6 @@ class CultivoProvider extends ChangeNotifier {
           nombre: oldItem.nombre,
           idCategoria: oldItem.idCategoria,
           idUbicacion: oldItem.idUbicacion,
-          fechaInicio: oldItem.fechaInicio,
           estado: AppStatus.inactivo,
         );
         _cultivos[index] = updatedItem;

@@ -2,7 +2,7 @@ import 'referencia_base.dart';
 
 // Modelo para la tabla Ubicacion
 class Ubicacion extends ReferenciaBase {
-  Ubicacion({required super.id, required super.nombre, super.estado});
+  Ubicacion({super.id, required super.nombre, super.estado});
 
   factory Ubicacion.fromMap(Map<String, dynamic> data) {
     return Ubicacion(
@@ -10,5 +10,8 @@ class Ubicacion extends ReferenciaBase {
       nombre: data['nombre'] as String? ?? '',
       estado: data['estado'] as String?,
     );
+  }
+  factory Ubicacion.fromReferenciaBase(ReferenciaBase ref) {
+    return Ubicacion(id: ref.id, nombre: ref.nombre, estado: ref.estado);
   }
 }

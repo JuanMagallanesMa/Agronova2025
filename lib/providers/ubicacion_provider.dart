@@ -36,9 +36,7 @@ class UbicacionProvider extends ChangeNotifier
   Future<void> add(Ubicacion item) async {
     try {
       final itemToSend = Ubicacion(
-        id: item.id,
         nombre: item.nombre,
-        estado: AppStatus.activo,
       );
       final newItem = await _api.add(itemToSend);
       _items.add(newItem);

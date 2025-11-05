@@ -24,14 +24,14 @@ class ReferenciaApi<T extends ReferenciaBase> extends HttpClient {
 
   // PUT: Actualizar una referencia completa (NO es override, solo usa put de la base)
   Future<void> update(T referencia) async {
-    if (referencia.id.isEmpty) {
-      throw Exception(
-        'El ID de la referencia no puede estar vacío para actualizar.',
-      );
-    }
-    // Llama a put de la clase base HttpClient
-    await put(endpoint, referencia.id, referencia.toMap());
+  if (referencia.id == null || referencia.id!.isEmpty) {
+    throw Exception(
+      'El ID de la referencia no puede estar vacío para actualizar.',
+    );
   }
+  // Usa toUpdateMap() en lugar de toMap() para excluir id y estado
+  await put(endpoint, referencia.id!, referencia.toUpdateMap());
+}
 
   // FUNCIÓN PARA ELIMINACIÓN LÓGICA
   Future<void> updateEstado(String id, String nuevoEstado) async {
@@ -42,6 +42,6 @@ class ReferenciaApi<T extends ReferenciaBase> extends HttpClient {
     }
 
     // El backend debe estar configurado para aceptar este PATCH/PUT lógico.
-    await put(endpoint, id, {'estado': nuevoEstado});
+    await delete(endpoint, id);
   }
 }

@@ -18,7 +18,7 @@ class ProductoApi extends HttpClient {
     if (producto.id == null) {
       throw Exception('ID de Producto requerido para actualizar.');
     }
-    await put(_endpoint, producto.id!, producto.toMap());
+    await put(_endpoint, producto.id!, producto.toUpdateMap());
   }
 
   // Eliminación Lógica
@@ -26,6 +26,6 @@ class ProductoApi extends HttpClient {
     if (id.isEmpty) {
       throw Exception('ID de Producto requerido para actualizar el estado.');
     }
-    await put(_endpoint, id, {'estado': nuevoEstado});
+    await delete(_endpoint, id);
   }
 }
