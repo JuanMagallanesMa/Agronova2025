@@ -1,4 +1,6 @@
 import 'package:agronova_app/pagina_inicio.dart';
+import 'package:agronova_app/providers/ia_provider.dart';
+import 'package:agronova_app/screens/ia/asistente_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -29,9 +31,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   // Inicializa la localización para formatos de fecha (ej. 'es_CO')
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
   runApp(const AppState());
 }
@@ -57,6 +57,8 @@ class AppState extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => TipoInsumoProvider()),
         ChangeNotifierProvider(create: (_) => TipoTareaProvider()),
         ChangeNotifierProvider(create: (_) => UbicacionProvider()),
+        // En MultiProvider:
+        ChangeNotifierProvider(create: (_) => IaProvider()),
       ],
       child: const MyApp(),
     );
@@ -121,6 +123,7 @@ class MyApp extends StatelessWidget {
         PaginaAgricultores.routeName: (ctx) => const PaginaAgricultores(),
         PaginaProductos.routeName: (ctx) => const PaginaProductos(),
         PaginaMercado.routeName: (ctx) => const PaginaMercado(),
+        AsistenteScreen.routeName: (ctx) => AsistenteScreen(),
       },
     );
   }

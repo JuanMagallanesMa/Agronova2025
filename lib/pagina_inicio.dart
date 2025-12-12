@@ -1,3 +1,4 @@
+import 'package:agronova_app/screens/ia/asistente_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:agronova_app/widgets/layout/main_scaffold.dart';
 import 'package:agronova_app/screens/cultivos/pagina_cultivos.dart';
@@ -68,6 +69,14 @@ class PaginaInicio extends StatelessWidget {
             subtitle: 'Registra las ventas.',
             onTap: () {
               Navigator.of(context).pushNamed(PaginaMercado.routeName);
+            },
+          ),
+          _DashboardCard(
+            icon: Icons.assistant,
+            title: 'Asistente Virtual',
+            subtitle: 'Asistente Virtual.',
+            onTap: () {
+              Navigator.of(context).pushNamed(AsistenteScreen.routeName);
             },
           ),
 

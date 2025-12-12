@@ -9,21 +9,46 @@ class AgricultorProvider extends ChangeNotifier {
   List<Agricultor> _agricultores = [];
   bool _isLoading = false;
 
+  // 1. NUEVO: Variable privada para guardar el usuario actual
+  Agricultor? _agricultorActual;
+
   List<Agricultor> get agricultores =>
       _agricultores.where((a) => a.estado == AppStatus.activo).toList();
+
   bool get isLoading => _isLoading;
+
+  // 2. NUEVO: Getter público que usa el Botón de Voz
+  Agricultor? get agricultorActual => _agricultorActual;
 
   Future<void> fetchAgricultores() async {
     _isLoading = true;
     notifyListeners();
     try {
       _agricultores = await _api.fetchAll();
+
+      // 3. NUEVO: Auto-login (Selecciona al primer agricultor activo automáticamente)
+      // Esto es vital para que la IA sepa con quién hablar sin una pantalla de Login real.
+      if (_agricultores.isNotEmpty && _agricultorActual == null) {
+        try {
+          _agricultorActual = _agricultores.firstWhere(
+            (a) => a.estado == AppStatus.activo,
+          );
+        } catch (e) {
+          // Si no hay activos, no seleccionamos a nadie
+        }
+      }
     } catch (e) {
       debugPrint('Error fetching agricultores: $e');
     } finally {
       _isLoading = false;
       notifyListeners();
     }
+  }
+
+  // 4. NUEVO: Método para cambiar de usuario manualmente (si lo necesitaras)
+  void seleccionarAgricultor(Agricultor agricultor) {
+    _agricultorActual = agricultor;
+    notifyListeners();
   }
 
   Future<void> addAgricultor(Agricultor agricultor) async {
@@ -38,6 +63,10 @@ class AgricultorProvider extends ChangeNotifier {
       );
       final newAgricultor = await _api.add(itemToSend);
       _agricultores.add(newAgricultor);
+
+      // Si es el primer usuario que creas, lo seleccionamos de una vez
+      _agricultorActual ??= newAgricultor;
+
       notifyListeners();
     } catch (e) {
       debugPrint('Error adding agricultor: $e');
@@ -50,6 +79,11 @@ class AgricultorProvider extends ChangeNotifier {
       final index = _agricultores.indexWhere((a) => a.id == agricultor.id);
       if (index != -1) {
         _agricultores[index] = agricultor;
+
+        // Si editamos al usuario actual, actualizamos la referencia también
+        if (_agricultorActual?.id == agricultor.id) {
+          _agricultorActual = agricultor;
+        }
         notifyListeners();
       }
     } catch (e) {
@@ -57,32 +91,33 @@ class AgricultorProvider extends ChangeNotifier {
     }
   }
 
-  // --- CAMBIO AQUÍ ---
   Future<void> deleteAgricultor(String id) async {
     try {
-      // Llama al nuevo método de la API que envía un DELETE
       await _api.deleteLogico(id);
 
       final index = _agricultores.indexWhere((a) => a.id == id);
       if (index != -1) {
         final oldItem = _agricultores[index];
-        // Actualiza el estado localmente para que desaparezca de la UI
         final updatedItem = Agricultor(
           id: oldItem.id,
           nombre: oldItem.nombre,
           edad: oldItem.edad,
           zona: oldItem.zona,
           experiencia: oldItem.experiencia,
-          estado: AppStatus.inactivo, // <-- Sigue siendo borrado lógico
+          estado: AppStatus.inactivo,
         );
         _agricultores[index] = updatedItem;
+
+        // Si borramos al usuario actual, lo quitamos de la selección
+        if (_agricultorActual?.id == id) {
+          _agricultorActual = null;
+        }
       }
       notifyListeners();
     } catch (e) {
       debugPrint('Error deleting agricultor logically: $e');
     }
   }
-  // --------------------
 
   List<Agricultor> searchAgricultores(String query) {
     if (query.isEmpty) return agricultores;
