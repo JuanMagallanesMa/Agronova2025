@@ -37,6 +37,9 @@ class _RegistroVentaState extends State<RegistroVenta> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<ProductoProvider>(context, listen: false).fetchProductos();
+    });
     _isEditing = widget.venta != null;
     if (_isEditing) {
       final venta = widget.venta!;

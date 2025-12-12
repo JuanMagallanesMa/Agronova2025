@@ -1,5 +1,7 @@
 // lib/models/tarea.dart
-import 'package:agronova_app/core/app_constants.dart';
+
+import '../core/app_constants.dart';
+import 'insumo_agregado.dart';
 
 class Tarea {
   String? id;
@@ -11,9 +13,10 @@ class Tarea {
   DateTime fechaFin;
   String estado;
 
-  // Relaciones N:M almacenadas como listas de IDs
   List<String> idAgricultores; // (Tabla TareaAgricultor)
-  List<String> idInsumos; // (Tabla TareaInsumo)
+  
+  // 2. Reemplazar idInsumos
+  List<InsumoAsignado> insumosAsignados; // (Tabla TareaInsumo con cantidad)
 
   Tarea({
     this.id,
@@ -25,7 +28,7 @@ class Tarea {
     required this.fechaFin,
     required this.estado,
     required this.idAgricultores,
-    required this.idInsumos,
+    required this.insumosAsignados, // 3. Actualizar constructor
   });
 
   // Convierte Map (JSON de la API) a objeto Tarea
@@ -40,7 +43,11 @@ class Tarea {
       fechaFin: DateTime.parse(data['fechaFin'] as String),
       estado: data['estado'] as String? ?? AppStatus.pendiente,
       idAgricultores: List<String>.from(data['idAgricultores'] ?? []),
-      idInsumos: List<String>.from(data['idInsumos'] ?? []),
+      
+      // 4. Mapear la lista de objetos anidada
+      insumosAsignados: (data['insumosAsignados'] as List<dynamic>? ?? [])
+          .map((item) => InsumoAsignado.fromMap(item as Map<String, dynamic>))
+          .toList(),
     );
   }
 
@@ -56,10 +63,13 @@ class Tarea {
       'fechaFin': fechaFin.toIso8601String().split('T').first,
       'estado': estado,
       'idAgricultores': idAgricultores,
-      'idInsumos': idInsumos,
+      
+      // 5. Serializar la lista de objetos
+      'insumosAsignados': insumosAsignados.map((item) => item.toMap()).toList(),
     };
   }
 
+  // 6. El método toUpdateCompleteMap debe replicar el cambio
   Map<String, dynamic> toUpdateCompleteMap() {
     return {
       'idTipoTarea': idTipoTarea,
@@ -70,12 +80,11 @@ class Tarea {
       'fechaFin': fechaFin.toIso8601String().split('T').first,
       'estado': AppStatus.completada,
       'idAgricultores': idAgricultores,
-      'idInsumos': idInsumos,
+      'insumosAsignados': insumosAsignados.map((item) => item.toMap()).toList(),
     };
   }
 
-  // --- CORRECCIÓN ---
-  // Se añade el método copyWith para permitir actualizaciones inmutables
+  // 7. Actualizar el copyWith
   Tarea copyWith({
     String? id,
     String? idTipoTarea,
@@ -86,7 +95,7 @@ class Tarea {
     DateTime? fechaFin,
     String? estado,
     List<String>? idAgricultores,
-    List<String>? idInsumos,
+    List<InsumoAsignado>? insumosAsignados, // 8. Actualizar tipo
   }) {
     return Tarea(
       id: id ?? this.id,
@@ -98,7 +107,7 @@ class Tarea {
       fechaFin: fechaFin ?? this.fechaFin,
       estado: estado ?? this.estado,
       idAgricultores: idAgricultores ?? this.idAgricultores,
-      idInsumos: idInsumos ?? this.idInsumos,
+      insumosAsignados: insumosAsignados ?? this.insumosAsignados, // 9. Actualizar asignación
     );
   }
 }

@@ -22,23 +22,35 @@ class _RegistroProductoState extends State<RegistroProducto> {
   final _formKey = GlobalKey<FormState>();
   bool _isSaving = false;
 
-  // Variables temporales
+  // Variables de estado
   String _nombre = '';
   String _descripcion = '';
   int _cantidadStock = 0;
   double _precioCaja = 0.0;
-  String _idCultivo = '';
+  String? _idCultivo; // Cambiado a nullable para mejor manejo del Dropdown
 
   @override
   void initState() {
     super.initState();
+
+    // 1. CORRECCIÓN: Carga de Cultivos
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final cultivoProvider = Provider.of<CultivoProvider>(
+        context,
+        listen: false,
+      );
+      if (cultivoProvider.cultivos.isEmpty) {
+        cultivoProvider.fetchCultivos();
+      }
+    });
+
     final producto = widget.producto;
     if (producto != null) {
       _nombre = producto.nombre;
       _descripcion = producto.descripcion;
       _cantidadStock = producto.cantidadStock;
       _precioCaja = producto.precioCaja;
-      _idCultivo = producto.idCultivo;
+      _idCultivo = producto.idCultivo; // Puede ser un ID que ya no exista
     }
   }
 
@@ -58,7 +70,8 @@ class _RegistroProductoState extends State<RegistroProducto> {
       descripcion: _descripcion,
       cantidadStock: _cantidadStock,
       precioCaja: _precioCaja,
-      idCultivo: _idCultivo,
+      idCultivo:
+          _idCultivo!, // Asumimos que el validador ya aseguró que no es null
       estado: widget.producto?.estado ?? AppStatus.activo,
     );
 
@@ -79,7 +92,9 @@ class _RegistroProductoState extends State<RegistroProducto> {
         );
       }
     } finally {
-      setState(() => _isSaving = false);
+      if (mounted) {
+        setState(() => _isSaving = false);
+      }
     }
   }
 
@@ -87,6 +102,16 @@ class _RegistroProductoState extends State<RegistroProducto> {
   Widget build(BuildContext context) {
     final isEditing = widget.producto != null;
     final cultivoProvider = Provider.of<CultivoProvider>(context);
+
+    // 2. SEGURIDAD: Verificar si el _idCultivo actual existe en la lista cargada
+    // Si la lista ya cargó y el ID no está, reseteamos a null para evitar crash
+    // (Opcional: podrías mostrar un texto de "Cultivo eliminado")
+    if (!cultivoProvider.isLoading &&
+        _idCultivo != null &&
+        _idCultivo!.isNotEmpty &&
+        !cultivoProvider.cultivos.any((c) => c.id == _idCultivo)) {
+      _idCultivo = null;
+    }
 
     return MainScaffold(
       title: isEditing ? 'Editar Producto' : 'Registrar Producto',
@@ -102,6 +127,7 @@ class _RegistroProductoState extends State<RegistroProducto> {
                 initialValue: _nombre,
                 decoration: const InputDecoration(
                   labelText: 'Nombre del Producto',
+                  border: OutlineInputBorder(),
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
@@ -114,33 +140,53 @@ class _RegistroProductoState extends State<RegistroProducto> {
               const SizedBox(height: 15),
               TextFormField(
                 initialValue: _descripcion,
-                decoration: const InputDecoration(labelText: 'Descripción'),
+                decoration: const InputDecoration(
+                  labelText: 'Descripción',
+                  border: OutlineInputBorder(),
+                ),
+                maxLines: 2,
                 onSaved: (value) => _descripcion = value ?? '',
               ),
               const SizedBox(height: 15),
-              NumericInputField(
-                label: 'Stock (Cantidad disponible)',
-                initialValue: _cantidadStock.toString(),
-                isDecimal: false,
-                onSaved: (value) => _cantidadStock = int.tryParse(value) ?? 0,
-              ),
-              const SizedBox(height: 15),
-              NumericInputField(
-                label: 'Precio por Caja/Unidad',
-                initialValue: _precioCaja.toString(),
-                isDecimal: true,
-                onSaved: (value) => _precioCaja = double.tryParse(value) ?? 0.0,
+              Row(
+                children: [
+                  Expanded(
+                    child: NumericInputField(
+                      label: 'Stock',
+                      initialValue: _cantidadStock.toString(),
+                      isDecimal: false,
+                      onSaved: (value) =>
+                          _cantidadStock = int.tryParse(value) ?? 0,
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: NumericInputField(
+                      label: 'Precio Unit.',
+                      initialValue: _precioCaja.toString(),
+                      isDecimal: true,
+                      onSaved: (value) =>
+                          _precioCaja = double.tryParse(value) ?? 0.0,
+                    ),
+                  ),
+                ],
               ),
               const SizedBox(height: 15),
 
-              // Dropdown para Cultivo (No es un catálogo base)
-              if (!cultivoProvider.isLoading)
+              // Dropdown para Cultivo
+              if (cultivoProvider.isLoading)
+                const Padding(
+                  padding: EdgeInsets.all(12.0),
+                  child: LinearProgressIndicator(),
+                )
+              else
                 DropdownButtonFormField<String>(
                   decoration: const InputDecoration(
                     labelText: 'Cultivo de Origen',
                     border: OutlineInputBorder(),
                   ),
-                  value: _idCultivo.isEmpty ? null : _idCultivo,
+                  // Usamos el _idCultivo verificado
+                  value: _idCultivo,
                   items: cultivoProvider.cultivos.map((Cultivo cultivo) {
                     return DropdownMenuItem<String>(
                       value: cultivo.id,
@@ -149,7 +195,7 @@ class _RegistroProductoState extends State<RegistroProducto> {
                   }).toList(),
                   onChanged: (value) {
                     setState(() {
-                      _idCultivo = value!;
+                      _idCultivo = value;
                     });
                   },
                   validator: (value) {
@@ -159,8 +205,6 @@ class _RegistroProductoState extends State<RegistroProducto> {
                     return null;
                   },
                 ),
-              if (cultivoProvider.isLoading)
-                const Center(child: Text('Cargando cultivos...')),
 
               const SizedBox(height: 30),
               ActionButton(

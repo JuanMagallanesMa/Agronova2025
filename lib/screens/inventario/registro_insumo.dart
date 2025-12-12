@@ -22,21 +22,45 @@ class _RegistroInsumoState extends State<RegistroInsumo> {
   final _formKey = GlobalKey<FormState>();
   bool _isSaving = false;
 
-  // Variables temporales para el formulario
+  // Variables de estado
   String _descripcion = '';
   String _idTipoInsumo = '';
   int _cantidad = 0;
-  String _unidadMedida = '';
+  String _unidadMedida = 'Kg'; // Valor por defecto seguro
+
+  // Lista estática de unidades (podría venir de una constante o DB)
+  final List<String> _unidadesDisponibles = [
+    'Kg',
+    'Litros',
+    'Unidades',
+    'Bolsas',
+    'Galones',
+  ];
 
   @override
   void initState() {
     super.initState();
-    final insumo = widget.insumo;
 
-    _descripcion = insumo?.descripcion ?? '';
-    _idTipoInsumo = insumo?.idTipoInsumo ?? '';
-    _cantidad = insumo?.cantidad ?? 0;
-    _unidadMedida = insumo?.unidadMedida ?? 'Kg';
+    // 1. CORRECCIÓN CRÍTICA: Cargar el catálogo
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<TipoInsumoProvider>(context, listen: false).fetchAll();
+    });
+
+    final insumo = widget.insumo;
+    if (insumo != null) {
+      _descripcion = insumo.descripcion;
+      _idTipoInsumo = insumo.idTipoInsumo;
+      _cantidad = insumo.cantidad;
+
+      // 2. CORRECCIÓN DE SEGURIDAD (Dropdown Crash):
+      // Si la unidad que viene de la BD no está en nuestra lista hardcodeada,
+      // la agregamos temporalmente o forzamos un default para evitar crash.
+      // Aquí optamos por mantener el valor original aunque no esté en la lista estándar.
+      if (!_unidadesDisponibles.contains(insumo.unidadMedida)) {
+        _unidadesDisponibles.add(insumo.unidadMedida);
+      }
+      _unidadMedida = insumo.unidadMedida;
+    }
   }
 
   Future<void> _saveForm() async {
@@ -75,7 +99,9 @@ class _RegistroInsumoState extends State<RegistroInsumo> {
         );
       }
     } finally {
-      setState(() => _isSaving = false);
+      if (mounted) {
+        setState(() => _isSaving = false);
+      }
     }
   }
 
@@ -99,6 +125,7 @@ class _RegistroInsumoState extends State<RegistroInsumo> {
                 initialValue: _descripcion,
                 decoration: const InputDecoration(
                   labelText: 'Descripción del Insumo',
+                  border: OutlineInputBorder(), // Un toque visual
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
@@ -111,7 +138,13 @@ class _RegistroInsumoState extends State<RegistroInsumo> {
               const SizedBox(height: 15),
 
               // Dropdown Tipo de Insumo (Catálogo)
-              if (!tipoInsumoProvider.isLoading)
+              // Usamos un AnimatedSwitcher o un simple if para UX
+              if (tipoInsumoProvider.isLoading)
+                const Padding(
+                  padding: EdgeInsets.all(12.0),
+                  child: Center(child: LinearProgressIndicator()),
+                )
+              else
                 FormDropdownCatalogo(
                   label: 'Tipo de Insumo',
                   selectedId: _idTipoInsumo,
@@ -122,8 +155,6 @@ class _RegistroInsumoState extends State<RegistroInsumo> {
                     });
                   },
                 ),
-              if (tipoInsumoProvider.isLoading)
-                const Center(child: Text('Cargando tipos de insumo...')),
               const SizedBox(height: 15),
 
               // Campo Cantidad
@@ -135,14 +166,14 @@ class _RegistroInsumoState extends State<RegistroInsumo> {
               ),
               const SizedBox(height: 15),
 
-              // Campo Unidad de Medida (simulamos un simple dropdown para las unidades más comunes)
+              // Campo Unidad de Medida
               DropdownButtonFormField<String>(
                 decoration: const InputDecoration(
                   labelText: 'Unidad de Medida',
                   border: OutlineInputBorder(),
                 ),
                 value: _unidadMedida,
-                items: ['Kg', 'Litros', 'Unidades', 'Bolsas'].map((unit) {
+                items: _unidadesDisponibles.map((unit) {
                   return DropdownMenuItem<String>(
                     value: unit,
                     child: Text(unit),
@@ -153,6 +184,8 @@ class _RegistroInsumoState extends State<RegistroInsumo> {
                     _unidadMedida = value!;
                   });
                 },
+                validator: (value) =>
+                    value == null ? 'Seleccione una unidad' : null,
               ),
               const SizedBox(height: 30),
 

@@ -20,10 +20,9 @@ class RegistroCultivo extends StatefulWidget {
 
 class _RegistroCultivoState extends State<RegistroCultivo> {
   final _formKey = GlobalKey<FormState>();
-  late Cultivo _editedCultivo;
   bool _isSaving = false;
 
-  // Variables temporales para el formulario
+  // Variables de estado
   String _nombre = '';
   String _idCategoria = '';
   String _idUbicacion = '';
@@ -31,17 +30,32 @@ class _RegistroCultivoState extends State<RegistroCultivo> {
   @override
   void initState() {
     super.initState();
-    _editedCultivo =
-        widget.cultivo ??
-        Cultivo(
-          nombre: '',
-          idCategoria: '',
-          idUbicacion: '',
-        );
 
-    _nombre = _editedCultivo.nombre;
-    _idCategoria = _editedCultivo.idCategoria;
-    _idUbicacion = _editedCultivo.idUbicacion;
+    // 1. CORRECCIÓN: Carga de catálogos
+    // Usamos addPostFrameCallback para evitar errores de construcción
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final categoriaProvider = Provider.of<CategoriaCultivoProvider>(
+        context,
+        listen: false,
+      );
+      final ubicacionProvider = Provider.of<UbicacionProvider>(
+        context,
+        listen: false,
+      );
+
+      // Verificamos si ya tienen datos para no llamar a Firebase innecesariamente
+      // (Opcional: Si quieres refrescar siempre, quita el 'if')
+      if (categoriaProvider.items.isEmpty) categoriaProvider.fetchAll();
+      if (ubicacionProvider.items.isEmpty) ubicacionProvider.fetchAll();
+    });
+
+    // Inicialización de datos para edición
+    final cultivo = widget.cultivo;
+    if (cultivo != null) {
+      _nombre = cultivo.nombre;
+      _idCategoria = cultivo.idCategoria;
+      _idUbicacion = cultivo.idUbicacion;
+    }
   }
 
   Future<void> _saveForm() async {
@@ -55,11 +69,11 @@ class _RegistroCultivoState extends State<RegistroCultivo> {
     final isEditing = widget.cultivo != null;
 
     final cultivoToSave = Cultivo(
-      id: _editedCultivo.id,
+      id: widget.cultivo?.id,
       nombre: _nombre,
       idCategoria: _idCategoria,
       idUbicacion: _idUbicacion,
-      estado: _editedCultivo.estado ?? AppStatus.activo,
+      estado: widget.cultivo?.estado ?? AppStatus.activo,
     );
 
     try {
@@ -79,7 +93,9 @@ class _RegistroCultivoState extends State<RegistroCultivo> {
         );
       }
     } finally {
-      setState(() => _isSaving = false);
+      if (mounted) {
+        setState(() => _isSaving = false);
+      }
     }
   }
 
@@ -104,6 +120,7 @@ class _RegistroCultivoState extends State<RegistroCultivo> {
                 initialValue: _nombre,
                 decoration: const InputDecoration(
                   labelText: 'Nombre del Cultivo',
+                  border: OutlineInputBorder(),
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
@@ -115,37 +132,36 @@ class _RegistroCultivoState extends State<RegistroCultivo> {
               ),
               const SizedBox(height: 15),
 
-              // Dropdown Categoría (Catálogo)
-              if (!categoriaProvider.isLoading)
+              // Dropdown Categoría
+              // MEJORA: Un Loader visualmente más agradable
+              if (categoriaProvider.isLoading)
+                const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 10),
+                  child: LinearProgressIndicator(),
+                )
+              else
                 FormDropdownCatalogo(
                   label: 'Categoría',
                   selectedId: _idCategoria,
                   items: categoriaProvider.items,
-                  onChanged: (value) {
-                    setState(() {
-                      _idCategoria = value!;
-                    });
-                  },
+                  onChanged: (value) => setState(() => _idCategoria = value!),
                 ),
-              if (categoriaProvider.isLoading)
-                const Center(child: Text('Cargando categorías...')),
               const SizedBox(height: 15),
 
-              // Dropdown Ubicación (Catálogo)
-              if (!ubicacionProvider.isLoading)
+              // Dropdown Ubicación
+              if (ubicacionProvider.isLoading)
+                const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 10),
+                  child: LinearProgressIndicator(),
+                )
+              else
                 FormDropdownCatalogo(
                   label: 'Ubicación',
                   selectedId: _idUbicacion,
                   items: ubicacionProvider.items,
-                  onChanged: (value) {
-                    setState(() {
-                      _idUbicacion = value!;
-                    });
-                  },
+                  onChanged: (value) => setState(() => _idUbicacion = value!),
                 ),
-              if (ubicacionProvider.isLoading)
-                const Center(child: Text('Cargando ubicaciones...')),
-              const SizedBox(height: 15),
+              const SizedBox(height: 30),
 
               ActionButton(
                 text: isEditing ? 'Guardar Cambios' : 'Registrar Cultivo',

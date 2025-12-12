@@ -1,15 +1,12 @@
-// Import duplicado eliminado
 import 'package:agronova_app/providers/tarea_provider.dart';
 import 'package:agronova_app/screens/tareas/registro_tarea.dart';
+import 'package:agronova_app/widgets/layout/main_scaffold.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:agronova_app/models/tarea.dart';
-// Import necesario para los estados
-import 'package:agronova_app/core/app_constants.dart';
-import 'package:agronova_app/widgets/layout/main_scaffold.dart';
-import 'package:agronova_app/widgets/cards/card_tarea.dart';
-import 'package:agronova_app/widgets/shared/loading_spinner.dart';
-import 'package:agronova_app/widgets/shared/delete_dialog.dart';
+
+import 'tareas_gantt_chart.dart';
+import 'tareas_list_view.dart';
 
 class PaginaTareas extends StatefulWidget {
   static const String routeName = '/tareas';
@@ -23,6 +20,8 @@ class _PaginaTareasState extends State<PaginaTareas> {
   @override
   void initState() {
     super.initState();
+    // La lógica de fetch sigue aquí, lo cual es perfecto.
+    // Alimentará a ambos tabs.
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
         Provider.of<TareaProvider>(context, listen: false).fetchTareas();
@@ -36,91 +35,40 @@ class _PaginaTareasState extends State<PaginaTareas> {
     );
   }
 
-  void _showDeleteDialog(BuildContext context, Tarea tarea) {
-    showDialog(
-      context: context,
-      builder: (ctx) => DeleteDialog(
-        title: 'Eliminar Tarea',
-        content: '¿Está seguro que desea inactivar a "${tarea.nombre}"?',
-        onConfirm: () {
-          Provider.of<TareaProvider>(
-            context,
-            listen: false,
-          ).deleteTarea(tarea.id!);
-        },
-      ),
-    );
-  }
-
-  // --- NUEVO ---
-  // Función para confirmar y marcar la tarea como completada
-  void _showCompleteDialog(BuildContext context, Tarea tarea) {
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Completar Tarea'),
-        content: Text(
-          '¿Está seguro que desea marcar la tarea "${tarea.nombre}" como completada?',
-        ),
-        actions: <Widget>[
-          TextButton(
-            child: const Text('Cancelar'),
-            onPressed: () {
-              Navigator.of(ctx).pop();
-            },
-          ),
-          TextButton(
-            child: const Text('Confirmar'),
-            onPressed: () {
-              // Usamos copyWith para crear una nueva instancia solo con el estado cambiado
-              final updatedTask = tarea.copyWith(estado: AppStatus.completada);
-
-              Provider.of<TareaProvider>(
-                context,
-                listen: false,
-              ).updateTarea(updatedTask); // Llamamos al update general
-
-              Navigator.of(ctx).pop();
-            },
-          ),
-        ],
-      ),
-    );
-  }
-  // --- FIN NUEVO ---
-
   @override
   Widget build(BuildContext context) {
-    final tareaProvider = Provider.of<TareaProvider>(context);
-
-    return MainScaffold(
-      title: 'Gestión de Tareas',
-      trailingAppBar: IconButton(
-        icon: const Icon(Icons.add, color: Colors.white),
-        onPressed: () => _navigateToRegistro(),
+    // Usamos DefaultTabController para sincronizar el TabBar y el TabBarView
+    return DefaultTabController(
+      length: 2, // Dos pestañas: Lista y Gantt
+      child: MainScaffold(
+        title: 'Gestión de Tareas',
+        trailingAppBar: IconButton(
+          icon: const Icon(Icons.add, color: Colors.white),
+          onPressed: () => _navigateToRegistro(),
+        ),
+        // Pasamos el TabBar al 'bottom' del AppBar de tu MainScaffold
+        // (Asumiendo que MainScaffold tiene una propiedad 'bottomAppBar' o similar)
+        // Si MainScaffold no lo tiene, modifica MainScaffold para aceptarlo.
+        bottomAppBar: const TabBar(
+          labelColor: Colors.white, // Color del texto de la pestaña activa
+          unselectedLabelColor:
+              Colors.white70, // Color del texto de las pestañas inactivas
+          indicatorColor: Colors.white, // Color de la línea indicadora
+          tabs: [
+            Tab(icon: Icon(Icons.list), text: 'Lista'),
+            Tab(icon: Icon(Icons.bar_chart), text: 'Gantt'),
+          ],
+        ),
+        // El cuerpo es ahora un TabBarView que contiene nuestras dos vistas
+        body: const TabBarView(
+          children: [
+            // Vista 1: La lista (refactorizada)
+            TareasListView(),
+            // Vista 2: El Gantt (nuevo)
+            TareasGanttView(),
+          ],
+        ),
       ),
-      body: tareaProvider.isLoading
-          ? const LoadingSpinner()
-          : tareaProvider.tareas.isEmpty
-          ? const Center(
-              // Corrección de texto: "activos" -> "activas"
-              child: Text('No hay tareas activas registradas.'),
-            )
-          : ListView.builder(
-              itemCount: tareaProvider.tareas.length,
-              itemBuilder: (ctx, i) {
-                final tarea = tareaProvider.tareas[i];
-                return CardTarea(
-                  tarea: tarea,
-                  onEdit: () => _navigateToRegistro(tarea),
-                  onDelete: () => _showDeleteDialog(context, tarea),
-                  // --- CORREGIDO ---
-                  // Se implementa la llamada a la función de completar
-                  onMarkCompleted: () => _showCompleteDialog(context, tarea),
-                  // --- FIN CORREGIDO ---
-                );
-              },
-            ),
     );
   }
 }
